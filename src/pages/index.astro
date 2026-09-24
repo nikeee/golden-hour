@@ -36,10 +36,11 @@ const base = "/golden-hour";
               <ul>
                 {cities.map((city) => {
                   const calendarPath = '/calendars/' + city.countryCode + '/' + city.slug + '.ics';
+                  const fullPath = base + calendarPath;
                   return (
                     <li data-city data-search={(country.name + ' ' + city.name).toLocaleLowerCase()}>
                       <span>{city.name}</span>
-                      <a class="subscribe" href={base + calendarPath} data-calendar-path={calendarPath}>Subscribe</a>
+                      <a class="subscribe" href={fullPath} data-calendar-path={fullPath}>Subscribe</a>
                     </li>
                   );
                 })}
