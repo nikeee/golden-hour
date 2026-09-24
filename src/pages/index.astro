@@ -1,15 +1,111 @@
 ---
-
+import { countries, locations, locationsForCountry } from '../lib/locations';
 ---
+
 <html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="viewport" content="width=device-width" />
-		<title>Astro</title>
-	</head>
-	<body>
-		<h1>Astro</h1>
-	</body>
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="description" content="Static, subscribable Golden Hour calendars for cities around the world." />
+    <title>Golden Hour Calendars</title>
+  </head>
+  <body>
+    <main>
+      <p class="eyebrow">Photography planning</p>
+      <h1>Golden Hour Calendars</h1>
+      <p class="intro">Browse every available city, then subscribe to its Golden Hour calendar.</p>
+      <p class="meta">{locations.length.toLocaleString('en-US')} cities with more than 250,000 inhabitants � Updated with every build � Next 180 days</p>
+
+      <label>
+        <span>Find a city or country</span>
+        <input id="city-filter" type="search" placeholder="e.g. Berlin, Germany" autocomplete="off" />
+      </label>
+      <p id="search-results" class="search-results" aria-live="polite">{locations.length.toLocaleString('en-US')} cities</p>
+
+      <div id="country-groups">
+        {countries.map((country) => {
+          const cities = locationsForCountry(country.code);
+          return (
+            <section data-country-group>
+              <h2>
+                <a href={'/calendars/' + country.code + '/'}>{country.name}</a>
+                <span data-count>{cities.length} cities</span>
+              </h2>
+              <ul>
+                {cities.map((city) => {
+                  const calendarPath = '/calendars/' + city.countryCode + '/' + city.slug + '.ics';
+                  return (
+                    <li data-city data-search={(country.name + ' ' + city.name).toLocaleLowerCase()}>
+                      <span>{city.name}</span>
+                      <a class="subscribe" href={calendarPath} data-calendar-path={calendarPath}>Subscribe</a>
+                    </li>
+                  );
+                })}
+              </ul>
+            </section>
+          );
+        })}
+      </div>
+
+      <p class="attribution">City data: <a href="https://www.geonames.org/">GeoNames</a> (CC BY 4.0). Sun times: <a href="https://github.com/mourner/suncalc">SunCalc</a>.</p>
+    </main>
+
+    <script>
+      const input = document.querySelector<HTMLInputElement>('#city-filter')!;
+      const results = document.querySelector<HTMLElement>('#search-results')!;
+      const groups = document.querySelectorAll<HTMLElement>('[data-country-group]');
+
+      document.querySelectorAll<HTMLAnchorElement>('a.subscribe').forEach((link) => {
+        const url = new URL(link.dataset.calendarPath!, window.location.origin);
+        url.protocol = 'webcal:';
+        link.href = url.href;
+      });
+
+      input.addEventListener('input', () => {
+        const query = input.value.trim().toLocaleLowerCase();
+        let matchCount = 0;
+
+        groups.forEach((group) => {
+          let countryMatchCount = 0;
+          group.querySelectorAll<HTMLElement>('[data-city]').forEach((city) => {
+            const isMatch = !query || city.dataset.search?.includes(query);
+            city.hidden = !isMatch;
+            if (isMatch) countryMatchCount += 1;
+          });
+
+          group.hidden = countryMatchCount === 0;
+          group.querySelector<HTMLElement>('[data-count]')!.textContent =
+            query ? countryMatchCount + ' matching cities' : countryMatchCount + ' cities';
+          matchCount += countryMatchCount;
+        });
+
+        results.textContent = matchCount + (matchCount === 1 ? ' city' : ' cities');
+      });
+    </script>
+  </body>
 </html>
+
+<style>
+  :global(*) { box-sizing: border-box; }
+  :global(body) { margin: 0; background: radial-gradient(circle at 80% 0, #66411e 0, #20150e 38rem, #100d0a 100%); color: #fff8ef; font-family: ui-sans-serif, system-ui, sans-serif; }
+  main { width: min(1000px, calc(100% - 2rem)); margin: 0 auto; padding: clamp(3rem, 10vw, 8rem) 0; }
+  .eyebrow { color: #f6b863; font-size: .8rem; font-weight: 700; letter-spacing: .13em; text-transform: uppercase; }
+  h1 { max-width: 10ch; margin: .4rem 0 1rem; font-size: clamp(3rem, 9vw, 6rem); line-height: .92; }
+  .intro { max-width: 38rem; font-size: clamp(1.15rem, 2vw, 1.45rem); line-height: 1.5; }
+  .meta, .attribution, .search-results { color: #d8c3aa; line-height: 1.6; }
+  label { display: block; max-width: 38rem; margin: 3rem 0 .6rem; }
+  label span { display: block; margin-bottom: .5rem; font-weight: 700; }
+  input { width: 100%; border: 1px solid #8b6240; border-radius: .65rem; padding: .9rem 1rem; background: #241911; color: inherit; font: inherit; }
+  #country-groups { display: grid; gap: 2rem; margin-top: 2rem; }
+  section { scroll-margin-top: 2rem; }
+  h2 { display: flex; justify-content: space-between; gap: 1rem; margin: 0 0 .7rem; padding-bottom: .7rem; border-bottom: 1px solid #6d4a2d; font-size: clamp(1.35rem, 3vw, 1.8rem); }
+  h2 span { color: #d8c3aa; font-size: .85rem; font-weight: 400; white-space: nowrap; }
+  ul { display: grid; grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr)); gap: .55rem; margin: 0; padding: 0; list-style: none; }
+  li { display: flex; align-items: center; justify-content: space-between; gap: 1rem; min-width: 0; padding: .7rem .8rem; border: 1px solid #443022; border-radius: .55rem; background: rgb(42 30 20 / .72); }
+  li > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  a { color: #ffd27d; }
+  .subscribe { flex: none; font-size: .88rem; }
+  .attribution { margin-top: 4rem; }
+  @media (max-width: 520px) { h2 { align-items: baseline; } ul { grid-template-columns: 1fr; } }
+</style>

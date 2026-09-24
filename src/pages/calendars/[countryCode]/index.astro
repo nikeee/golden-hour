@@ -1,0 +1,54 @@
+---
+import { countryName, countries, locationsForCountry } from '../../../lib/locations';
+
+export function getStaticPaths() {
+  return countries.map((country) => ({ params: { countryCode: country.code } }));
+}
+
+const countryCode = Astro.params.countryCode!;
+const cities = locationsForCountry(countryCode);
+const country = countryName(countryCode);
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>{country} Golden Hour Calendars</title>
+  </head>
+  <body>
+    <main>
+      <a href="/">← All countries</a>
+      <h1>{country}</h1>
+      <p>Subscribe to a city calendar in Apple Calendar. Times are calculated for the city location.</p>
+      <ul>
+        {cities.map((city) => {
+          const path = `/calendars/${city.countryCode}/${city.slug}.ics`;
+          return (
+            <li>
+              <strong>{city.name}</strong>
+              <a class="subscribe" href={path} data-calendar-path={path}>Subscribe</a>
+              <a href={path}>Download .ics</a>
+            </li>
+          );
+        })}
+      </ul>
+    </main>
+    <script>
+      document.querySelectorAll<HTMLAnchorElement>('a.subscribe').forEach((link) => {
+        const url = new URL(link.dataset.calendarPath!, window.location.origin);
+        url.protocol = 'webcal:';
+        link.href = url.href;
+      });
+    </script>
+  </body>
+</html>
+
+<style>
+  :global(body) { margin: 0; font-family: ui-sans-serif, system-ui, sans-serif; background: #17120e; color: #fff8ef; }
+  main { width: min(900px, calc(100% - 2rem)); margin: 0 auto; padding: 3rem 0 5rem; }
+  a { color: #ffd27d; }
+  ul { padding: 0; list-style: none; display: grid; gap: .75rem; }
+  li { display: grid; grid-template-columns: minmax(12rem, 1fr) auto auto; gap: 1rem; align-items: center; padding: 1rem; background: #2a211a; border-radius: .65rem; }
+  @media (max-width: 600px) { li { grid-template-columns: 1fr 1fr; } li strong { grid-column: 1 / -1; } }
+</style>
