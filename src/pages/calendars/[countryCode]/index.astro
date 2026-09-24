@@ -8,6 +8,8 @@ export function getStaticPaths() {
 const countryCode = Astro.params.countryCode!;
 const cities = locationsForCountry(countryCode);
 const country = countryName(countryCode);
+
+const base = "/golden-hour";
 ---
 
 <html lang="en">
@@ -18,7 +20,7 @@ const country = countryName(countryCode);
   </head>
   <body>
     <main>
-      <a href="/">← All countries</a>
+      <a href={base + "/"}>← All countries</a>
       <h1>{country}</h1>
       <p>Subscribe to a city calendar in Apple Calendar. Times are calculated for the city location.</p>
       <ul>
@@ -27,8 +29,8 @@ const country = countryName(countryCode);
           return (
             <li>
               <strong>{city.name}</strong>
-              <a class="subscribe" href={path} data-calendar-path={path}>Subscribe</a>
-              <a href={path}>Download .ics</a>
+              <a class="subscribe" href={base + path} data-calendar-path={path}>Subscribe</a>
+              <a href={base + path}>Download .ics</a>
             </li>
           );
         })}

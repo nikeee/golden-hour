@@ -1,11 +1,12 @@
 ---
 import { countries, locations, locationsForCountry } from '../lib/locations';
+const base = "/golden-hour";
 ---
 
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/svg+xml" href={base + "/favicon.svg"} />
     <meta name="viewport" content="width=device-width" />
     <meta name="description" content="Static, subscribable Golden Hour calendars for cities around the world." />
     <title>Golden Hour Calendars</title>
@@ -29,7 +30,7 @@ import { countries, locations, locationsForCountry } from '../lib/locations';
           return (
             <section data-country-group>
               <h2>
-                <a href={'/calendars/' + country.code + '/'}>{country.name}</a>
+                <a href={base + '/calendars/' + country.code + '/'}>{country.name}</a>
                 <span data-count>{cities.length} cities</span>
               </h2>
               <ul>
@@ -38,7 +39,7 @@ import { countries, locations, locationsForCountry } from '../lib/locations';
                   return (
                     <li data-city data-search={(country.name + ' ' + city.name).toLocaleLowerCase()}>
                       <span>{city.name}</span>
-                      <a class="subscribe" href={calendarPath} data-calendar-path={calendarPath}>Subscribe</a>
+                      <a class="subscribe" href={base + calendarPath} data-calendar-path={calendarPath}>Subscribe</a>
                     </li>
                   );
                 })}
