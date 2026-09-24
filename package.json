@@ -12,7 +12,8 @@
     "astro": "astro"
   },
   "dependencies": {
-    "astro": "^7.3.5"
+    "astro": "^7.3.5",
+    "suncalc": "^2.0.2"
   },
   "allowScripts": {
     "esbuild": true
